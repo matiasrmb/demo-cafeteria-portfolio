@@ -1,0 +1,33 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getContent } from '../lib/content';
+const content = await getContent();
+const clientConfig = JSON.stringify({ availability: content.availability, whatsapp: content.contact.whatsapp });
+---
+<Layout title="Reservas" description="Calendario ilustrativo de solicitudes de mesas y grupos. No crea, almacena ni confirma reservas." content={content}>
+  <section class="shell page-heading"><p class="eyebrow">Un encuentro por imaginar</p><h1>Elige un momento para compartir.</h1><p class="lead">{content.reservationsIntro}</p><p class="notice">Disponibilidad ilustrativa · Hora de Chile (America/Santiago) · Sin reservas ni almacenamiento de datos.</p></section>
+  <section class="shell booking section">
+    <form id="request-form" data-config={clientConfig} novalidate autocomplete="off">
+      <div class="form-top"><span class="step">01</span><h2>Tu encuentro</h2></div>
+      <div class="form-grid">
+        <div class="field"><label for="request-name">Nombre</label><input id="request-name" name="name" minlength="2" maxlength="80" required aria-describedby="error-name" /><p id="error-name" class="error"></p></div>
+        <div class="field"><label for="request-type">Tipo de solicitud</label><select id="request-type" name="type" required aria-describedby="error-type"><option value="table">Mesa</option><option value="event">Grupo/evento</option></select><p id="error-type" class="error"></p></div>
+        <div class="field"><label for="request-people">Cantidad de personas</label><input id="request-people" name="people" type="number" value="2" min="1" max="80" step="1" required aria-describedby="error-people" /><p id="error-people" class="error"></p></div>
+      </div>
+      <div class="form-top"><span class="step">02</span><h2>Fecha y hora de ejemplo</h2></div>
+      <div id="calendar" class="calendar" aria-label="Calendario de disponibilidad ilustrativa"><div class="calendar-heading"><button type="button" id="previous-month" aria-label="Mes anterior">←</button><h3 id="calendar-title" aria-live="polite"></h3><button type="button" id="next-month" aria-label="Mes siguiente">→</button></div><div class="weekdays" aria-hidden="true">{['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((day) => <span>{day}</span>)}</div><div id="calendar-days" class="calendar-days"></div></div>
+      <p class="calendar-legend">Contorno: disponible · Relleno verde: seleccionada · Tachado: no disponible</p>
+      <div class="form-grid">
+        <div class="field"><label for="request-date">Fecha</label><input id="request-date" name="date" type="date" required aria-describedby="error-date" /><p id="error-date" class="error"></p></div>
+        <div class="field"><label for="request-time">Hora</label><select id="request-time" name="time" required aria-describedby="error-time"><option value="">Selecciona una fecha</option></select><p id="error-time" class="error"></p></div>
+      </div>
+      <p id="form-status" role="status">Completa los campos y selecciona un horario para revisar tu solicitud.</p>
+      <button class="button" type="submit" disabled>Revisar solicitud</button>
+      <noscript><p class="notice">Activa JavaScript para explorar este calendario ilustrativo. Sin JavaScript no se envía ni almacena ningún dato.</p></noscript>
+    </form>
+    <aside class="booking-aside"><p class="eyebrow">Solo una conversación</p><h2>Sin reservas automáticas. Sin sorpresas.</h2><ol><li>Explora fechas y cupos de demostración.</li><li>Revisa los datos que completaste.</li><li>Si hay un destinatario configurado, abre WhatsApp y decide si envías el mensaje.</li></ol><p class="small">Al abrir WhatsApp, los datos se transfieren a ese servicio para preparar el mensaje. Solo se envía al destinatario si tú lo confirmas allí.</p><p id="destination-status" class="notice">WhatsApp no configurado o no válido: esta demo no genera un enlace hasta contar con un destinatario válido.</p><section id="request-summary" class="summary" aria-live="polite" hidden><h3>Revisa tu solicitud de demostración</h3><p id="summary-text"></p><p>No confirma una reserva. Este sitio no ha enviado mensajes ni guardado los datos.</p><a id="whatsapp-link" class="button" hidden rel="noopener noreferrer" target="_blank">Abrir WhatsApp para revisar</a></section></aside>
+  </section>
+</Layout>
+<script>
+  import '../scripts/booking';
+</script>

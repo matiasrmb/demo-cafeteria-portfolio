@@ -1,0 +1,11 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Scene from '../components/Scene.astro';
+import { getContent } from '../lib/content';
+const content = await getContent();
+---
+<Layout title="Grupos y eventos" description="Explora encuentros, mesas compartidas y eventos ilustrativos en una cafetería ficticia. Sin reservas reales." content={content}>
+  <section class="shell hero"><div><p class="eyebrow">El gusto de compartir</p><h1>{content.eventsTitle}</h1><p class="lead">{content.eventsIntro}</p><a class="button" href="/reservas/?tipo=evento">Explorar un grupo/evento →</a></div><Scene image={content.heroImage} eager /></section>
+  <section class="shell section"><p class="eyebrow">Cada encuentro, a su manera</p><h2>Un espacio imaginado para conectar.</h2><div class="cards">{content.groupFeatures.map((feature, index) => <article class="card"><span class="card-number" aria-hidden="true">0{index + 1}</span><h3>{feature.title}</h3><p>{feature.description}</p></article>)}</div></section>
+  <section class="shell callout"><div><h2>Una solicitud no es una confirmación.</h2><p>Los horarios y cupos son de ejemplo. El formulario solo prepara una conversación que tú decides enviar desde WhatsApp.</p></div><a class="button" href="/reservas/?tipo=evento">Ver disponibilidad de ejemplo</a></section>
+</Layout>

@@ -1,0 +1,46 @@
+---
+import '../styles/global.css';
+import type { CafeContent } from '../lib/types';
+interface Props { title: string; description: string; content: CafeContent }
+const { title, description, content } = Astro.props;
+const links = [['/', 'Inicio'], ['/menu/', 'Menú'], ['/grupos-y-eventos/', 'Grupos y eventos'], ['/reservas/', 'Reservas']];
+const days = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+const canonical = new URL(Astro.url.pathname, Astro.site);
+---
+<!doctype html>
+<html lang="es-CL">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="theme-color" content="#405346" />
+    <title>{title} · {content.name} · Demo</title>
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="sitemap" href="/sitemap.xml" />
+    <meta property="og:title" content={`${title} · ${content.name} · Demostración`} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content={new URL('/images/cafe-scene.svg', Astro.site)} />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Saltar al contenido</a>
+    <div class="demo-strip">Demo de portafolio <span aria-hidden="true">·</span> Negocio ficticio <span aria-hidden="true">·</span> Sin reservas reales</div>
+    <header class="site-header shell">
+      <a class="brand" href="/" aria-label={`${content.name}, inicio`}><span class="brand-mark" aria-hidden="true">b.</span><span>{content.name}<small>Café de demostración</small></span></a>
+      <nav aria-label="Principal">
+        {links.map(([href, label]) => <a href={href} aria-current={Astro.url.pathname === href ? 'page' : undefined}>{label}</a>)}
+      </nav>
+    </header>
+    <main id="main" tabindex="-1"><slot /></main>
+    <footer>
+      <div class="shell footer-grid">
+        <div><p class="eyebrow">Una idea para imaginar</p><p class="footer-brand">{content.name}</p><p>{content.tagline}</p><p>{content.contact.detail}</p></div>
+        <div><h2>Horarios de ejemplo</h2><dl class="hours">{days.map((day, weekday) => { const rule = content.availability.weekly.find((item) => item.weekday === weekday); return <div><dt>{day}</dt><dd>{rule ? `${rule.opens}–${rule.closes}` : 'Cerrado'}</dd></div>; })}</dl><p class="small">{content.contact.hoursNote}</p></div>
+        <div><h2>Ubicación referencial</h2><p>{content.contact.location}</p><a href="/reservas/">Explorar una solicitud →</a></div>
+      </div>
+      <div class="shell footer-note"><strong>Todo es de demostración.</strong> El negocio, menú, precios, opiniones, imágenes y disponibilidad son ficticios o ilustrativos. No hay venta, atención al público ni confirmación de reservas.</div>
+    </footer>
+  </body>
+</html>

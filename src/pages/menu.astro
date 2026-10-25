@@ -1,0 +1,11 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getContent, imageUrl } from '../lib/content';
+const content = await getContent();
+const price = new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' });
+---
+<Layout title="Menú" description="Menú ficticio de café, preparaciones de horno y sabores para compartir. Productos y precios de demostración." content={content}>
+  <section class="shell page-heading"><p class="eyebrow">Algo rico para tu pausa</p><h1>Nuestro menú, imaginado.</h1><p class="lead">{content.menuIntro}</p><p class="badge">Precios ilustrativos en pesos chilenos</p></section>
+  <div class="shell menu-layout"><nav class="category-nav" aria-label="Categorías del menú">{content.categories.map((category) => <a href={`#${category._key}`}>{category.title}</a>)}</nav><div>{content.categories.map((category) => <section class="menu-section" id={category._key} aria-labelledby={`${category._key}-title`}><p class="eyebrow">{category.description}</p><h2 id={`${category._key}-title`}>{category.title}</h2>{content.products.filter((product) => product.category === category._key).map((product) => <article class="menu-item">{product.image && <img src={imageUrl(product.image, 320)} alt={product.image.alt} width="120" height="100" loading="lazy" />}<div><h3>{product.name}</h3><p>{product.description}</p></div><span class="price">{price.format(product.price)}<small>Precio ficticio</small></span></article>)}</section>)}</div></div>
+  <section class="shell callout"><div><h2>La conversación también está en el menú.</h2><p>Explora una solicitud de demostración, sin crear una reserva.</p></div><a class="button" href="/reservas/">Probar el calendario →</a></section>
+</Layout>

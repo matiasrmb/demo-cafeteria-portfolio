@@ -1,0 +1,11 @@
+---
+import { imageUrl } from '../lib/content';
+import type { DemoImage } from '../lib/types';
+interface Props { image?: DemoImage; eager?: boolean }
+const { image, eager = false } = Astro.props;
+const remote = imageUrl(image, 1200);
+---
+<figure class="scene">
+  <img src={remote || '/images/cafe-scene.svg'} srcset={remote ? `${imageUrl(image, 480)} 480w, ${imageUrl(image, 800)} 800w, ${remote} 1200w` : undefined} sizes="(min-width: 800px) 50vw, 100vw" width="900" height="760" alt={image?.alt || 'Ilustración original de una taza de café, un pan de canela y hojas sobre una mesa cálida.'} loading={eager ? 'eager' : 'lazy'} fetchpriority={eager ? 'high' : 'auto'} decoding="async" />
+  <figcaption>Imagen ilustrativa · Demostración</figcaption>
+</figure>
