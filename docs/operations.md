@@ -1,6 +1,6 @@
 # Run, edit and publish the fictional café demo
 
-The website is a static Astro build. Sanity Studio is a separate, provider-authenticated editor. There is no reservation backend, visitor database, custom authentication or public reset endpoint. External accounts have not been configured or accessed by this implementation.
+The website is a static Astro build. Sanity Studio is a separate, provider-authenticated editor. There is no reservation backend, visitor database, custom authentication or public reset endpoint. GitHub source publication is authorized separately; Sanity and Cloudflare accounts have not been configured or accessed by this implementation.
 
 ## Local website
 
@@ -16,7 +16,7 @@ pnpm run build
 pnpm run dev
 ```
 
-Open the address printed by Astro (normally `http://127.0.0.1:4321`). `pnpm run preview` serves the generated build. Browser tests use a separate managed development server on port 4327 and never reuse an existing listener. Test screenshots/errors go outside the repository under the system temporary directory's `opencode/cafe-browser-*` folders. There is no lint configuration; type checking and functional tests are provided instead.
+Open the address printed by Astro (normally `http://127.0.0.1:4321`). `pnpm run preview` serves the generated build. Browser tests use a separate managed development server on port 4327 and never reuse an existing listener. Test screenshots/errors go outside the repository under the system temporary directory's `opencode/cafe-browser-*` folders. There is no active lint configuration or installed linter; a CLI-generated Studio template is preserved as `eslint.config.mjs.example`. Type checking and functional tests are provided instead, and no lint pass is claimed.
 
 The empty repository needed no migration from another package manager. `pnpm-lock.yaml` is the sole package lock. React is required only by Sanity Studio; the public site uses semantic HTML, CSS and one isolated TypeScript calendar module. SVG illustrations are original and carry a separate asset license under `public/images/`.
 
@@ -72,9 +72,11 @@ The recipient must contain valid international digits only, with no `+`, spaces,
 
 Local demo mode does not query Sanity. For CMS mode set `CONTENT_SOURCE=sanity` and the matching public IDs, then build. Queries use a fixed API version, the published perspective, the one published singleton and a bounded timeout, without any authentication token. An invalid/missing document fails the build. No drafts, credentials or visitor submissions belong in website content.
 
-After the owner explicitly authorizes external repository/hosting setup:
+GitHub source publication is authorized for the public repository `https://github.com/matiasrmb/demo-cafeteria-portfolio`, with `origin` configured and read access verified. Source publication targets `feat/cafe-demo`, leaving the existing `main` unchanged. Confirm a successful push by comparing the branch's remote SHA with local HEAD; remote configuration alone does not prove upload. Sanity and Cloudflare setup remains separate and inactive.
 
-1. Connect the chosen Git repository to a Cloudflare Pages project. This local repository has not been pushed or connected to any remote by this work.
+After the owner explicitly authorizes Cloudflare hosting setup:
+
+1. Connect that GitHub repository to a Cloudflare Pages project and select the branch containing the demo (`feat/cafe-demo`, unless subsequently merged by the owner). Do not assume the existing `main` contains the application.
 2. Configure root directory `/`, Node `24.15.0`, pnpm `11.1.3`, build command `pnpm run build`, output `dist`. Set host variables `NODE_VERSION` and `PNPM_VERSION` as supported by the selected Pages build image, and the public build configuration above. Verify the build log actually used those versions.
 3. Build/install this workspace from the frozen pnpm lockfile. Review the latest audit output before external deployment; successful installation alone is not security proof.
 4. Set `SITE_URL` to the approved HTTPS origin. Review the four HTML routes, sitemap, images, headers and browser console on the resulting preview before using a custom domain.
@@ -128,7 +130,7 @@ Official pages reviewed on 2026-10-25; limits/plans can change and must be reche
 | Sanity              | 20 seats, 2 public datasets, 10,000 documents, 250k API requests/month, 1M API CDN requests/month, 100 GB assets and 100 GB bandwidth; hosted Studio included; free project caps have no overages. This build uses the regular API, not the CDN. |
 | Cloudflare Pages    | 500 builds/month, one concurrent build, 20,000 files/site, 25 MiB maximum individual asset and 100 custom domains/project. No Pages Functions are required.                                                                                      |
 
-No accounts, IDs, real recipient, hosted Studio, deploy hook, domain, Git remote or publishing permission have been supplied/used here. Owner-only hosted editing, CMS-to-deploy propagation, real Click to Chat delivery, production headers and live restore remain external proof, not successful local-test claims. Read the current verification report for executed checks and unresolved findings.
+The GitHub repository and source-publication permission have been supplied, and scoped Git access has been verified. Sanity/Cloudflare accounts, CMS IDs, a real recipient, hosted Studio, deploy hook and domain remain unconfigured here. Owner-only hosted editing, CMS-to-deploy propagation, real Click to Chat delivery, production headers and live restore remain external proof, not successful local-test claims. Read the current verification report for executed checks and unresolved findings.
 
 ### Primary sources
 

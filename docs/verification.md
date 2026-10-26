@@ -1,5 +1,11 @@
 # Verification evidence
 
+## GitHub publication delta
+
+Source upload is authorized for public `matiasrmb/demo-cafeteria-portfolio`, branch `feat/cafe-demo`, without changing remote `main`. Sanity/Cloudflare deployment remains unauthorized and inactive. GitHub upload is not a website deployment.
+
+The publication verifier independently passed Studio TypeScript and an isolated Studio build with synthetic public IDs, confirmed unchanged source hashes and no strong secret-pattern matches, and verified that the lint template is inactive. It reported two stale Git-publication statements in the operations guide; both were corrected together. The three publication probes are retained in `tests/publish-delta.test.ts`. No new production logic or dependencies were added. Native review of the original source candidate remains incomplete as recorded below; no receipt or approval is claimed.
+
 This report distinguishes implementation from executed proof. External accounts have not been connected, deployed or mutated. Local functional verification passed on 2026-10-25; independent high-risk verification and native review routing are recorded separately below.
 
 ## Observed so far
@@ -37,7 +43,7 @@ The initial 12 audit findings are no longer present in this observed audit. The 
 - Independent verification of high-risk items 1, 2 and 5 completed in a fresh external scratch copy against baseline `2eeb153d21961f3cd734ac0426340c92ec9710b7`: no candidate-caused blockers. The verifier ran 16 existing tests and three independent probes successfully, checked exact CLI rejection/error behavior and unchanged hashes, and confirmed the project-bound template permission. Its initial scratch runner setup required adjustment; no candidate source correction was necessary.
 - The three independent probes are retained as `tests/high-risk-boundaries.test.ts` rather than depending on temporary files or Git history.
 - Parent spot check after the verifier and the reported usage interruption: all 16 existing tests still passed; after retaining the probes, all 19 tests and both type checkers passed. No usage-limit status is inferred from tool availability.
-- Native risk assessment/review routing under the user-owned review switch: pending.
+- Native risk assessment/review routing: blocked before START. The committed candidate requires a provider-bound intended-untracked selection for the two generated `.atl` index/cache files, but the `gentle-ai.review-intended-untracked-selection/v1` JSON definition is not supplied by the returned input or available in the installed consumer documentation. The exact selection payload was not guessed. No review lineage, candidate consent, receipt or approval was created; review mode remains on. Local functional and independent verification results remain valid, but this additional native review is not claimed complete.
 
 ## External checks not executed
 

@@ -1,0 +1,4 @@
+// Inactive CLI template: install ESLint and this preset before enabling it.
+import studio from '@sanity/eslint-config-studio'
+
+export default [...studio]
