@@ -63,7 +63,7 @@ test("migration writes the complete private snapshot before POST and preserves f
           },
         },
       ]);
-      return Response.json({ results: [{ documentId: "demo-cafe" }] });
+      return Response.json({ results: [{ id: "demo-cafe" }] });
     },
   });
   assert.equal(posts, 1);

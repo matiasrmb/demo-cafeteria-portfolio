@@ -179,7 +179,16 @@ export async function migrateDemoId(
     if (!response.ok) throw new Error("Mutation not confirmed");
     const payload = await response.json();
     const affected = payload.results?.map(
-      (result: { documentId?: string }) => result.documentId,
+      (result: { id?: string; documentId?: string }) => {
+        if (
+          result.id !== undefined &&
+          result.documentId !== undefined &&
+          result.id !== result.documentId
+        ) {
+          throw new Error("Conflicting mutation identities");
+        }
+        return result.id ?? result.documentId;
+      },
     );
     if (
       !Array.isArray(affected) ||

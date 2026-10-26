@@ -82,7 +82,7 @@ function fixture(documents: Document[]) {
     for (const { create: doc } of mutations) state.set(doc._id, doc);
     return Response.json({
       results: mutations.map(({ create: doc }: { create: Document }) => ({
-        documentId: doc._id,
+        id: doc._id,
       })),
     });
   };
@@ -245,7 +245,10 @@ test("migration does not mutate after read or backup failure and never retries u
   for (const outcome of [
     new Response("", { status: 409 }),
     new Response("", { status: 503 }),
-    Response.json({ results: [{ documentId: "wrong-id" }] }),
+    Response.json({ results: [{ id: "wrong-id" }] }),
+    Response.json({
+      results: [{ id: "demo-cafe", documentId: "different-id" }],
+    }),
   ]) {
     let posts = 0;
     await assert.rejects(
@@ -263,4 +266,20 @@ test("migration does not mutate after read or backup failure and never retries u
     );
     assert.equal(posts, 1);
   }
+});
+
+test("migration also confirms the documented documentId response shape", async () => {
+  const f = fixture([original]);
+  const result = await migrateDemoId(apply, env, {
+    writeBackup: f.writeBackup,
+    fetcher: async (input, init) => {
+      const response = await f.fetcher(input, init);
+      return init?.method === "POST"
+        ? Response.json({ results: [{ documentId: "demo-cafe" }] })
+        : response;
+    },
+  });
+  assert.equal(result.action, "migrated");
+  assert.deepEqual(result.destinationIds, ["demo-cafe"]);
+  assert.deepEqual(f.events, ["read", "backup", "post"]);
 });
