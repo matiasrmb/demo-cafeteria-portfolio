@@ -1,7 +1,7 @@
 import type { CafeContent } from "../lib/types.ts";
 
 export const demoContent: CafeContent = {
-  _id: "demo.cafe",
+  _id: "demo-cafe",
   _type: "cafeDemo",
   name: "Bruma",
   tagline: "Café de muestra · pausa junto al mar",

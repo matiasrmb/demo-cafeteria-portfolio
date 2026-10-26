@@ -1,7 +1,31 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { demoContent } from "../src/data/demo.ts";
-import { loadContent, validateContent } from "../src/lib/content.ts";
+import { DEMO_ID, loadContent, validateContent } from "../src/lib/content.ts";
+import { cmsSeed } from "../src/data/demo.ts";
+
+test("public singleton uses a root-path ID readable without authentication", async () => {
+  assert.equal(DEMO_ID, "demo-cafe");
+  assert.equal(cmsSeed()._id, "demo-cafe");
+  const published = { ...structuredClone(demoContent), _id: "demo-cafe" };
+  const result = await loadContent(
+    {
+      CONTENT_SOURCE: "sanity",
+      SANITY_PROJECT_ID: "demotest",
+      SANITY_DATASET: "production",
+    },
+    async (input, init) => {
+      const query = new URL(String(input)).searchParams.get("query")!;
+      assert.match(query, /_id == "demo-cafe"/);
+      assert.doesNotMatch(query, /demo\.cafe/);
+      assert.equal(new Headers(init?.headers).has("Authorization"), false);
+      return Response.json({
+        result: query.includes('"demo-cafe"') ? published : null,
+      });
+    },
+  );
+  assert.deepEqual(result, published);
+});
 
 test("local mode returns the validated fictional seed with no recipient or network", async () => {
   const content = await loadContent({}, async () => {
@@ -31,7 +55,7 @@ test("configured Sanity queries only the published singleton without authenticat
   const url = new URL(requested);
   assert.equal(url.hostname, "demotest.api.sanity.io");
   assert.equal(url.searchParams.get("perspective"), "published");
-  assert.ok(url.searchParams.get("query")!.includes("demo.cafe"));
+  assert.ok(url.searchParams.get("query")!.includes("demo-cafe"));
   assert.equal(result.homeTitle, published.homeTitle);
 });
 

@@ -1,5 +1,17 @@
 # Verification evidence
 
+## Root-path singleton correction and prepared migration
+
+The old `demo.cafe` ID is a private path under Sanity's fixed anonymous-access rules, even in a public dataset. The active contract is now `demo-cafe` for the published singleton and `drafts.demo-cafe` for its optional draft. Studio/schema validation derive the ID from the shared constant; seed/type, public query, restore confirmation/help, tests and webhook instructions agree. No public token or legacy-ID fallback was added.
+
+`scripts/migrate-demo-id.ts` is prepared, not executed against Sanity. Default/dry-run performs no network or writes. Future apply requires exact target consent, a process-only administrative token and an external private backup. It copies current content with `create` only, refuses existing targets, preserves original documents/history and draft status, and does not retry unknown outcomes. New document metadata is recreated. Operations documentation specifies separate execution authorization and copy-before-deploy cutover.
+
+Observed test-first proof: the new root-ID regression failed against the old constant, and three migration behavior tests failed against the explicit implementation stub. The refusal-only test already passed against the stub and is not counted as RED proof. After implementation, the focused content/migration suite passed 9/9; after retaining the independent real-backup/state-hash probe, the migration suite passed 5/5 and full Node suite passed 28/28. Synthetic API fixtures cover current published/draft content, unknown fields, assets, collisions, read/backup failures and mutation uncertainty. No real migration or application of the administrative command was performed.
+
+Functional verification in an external copy passed Astro checking (0 errors/warnings/hints), Studio TypeScript, the four-page static build, isolated Studio build with synthetic public IDs and no auto-updates/authentication, all 6 browser cases, and network-free migration dry-run. Direct installed CLI equivalents were used where pnpm would rewire borrowed dependency junctions. That verification exposed a local dependency-link incident: source hashes and lockfile were preserved, the owner reconstructed dependencies with offline/frozen/ignore-scripts install, and the parent confirmed zero links to verification scratch, local package resolution and 4/4 migration tests afterward. No dependency versions changed.
+
+Independent high-risk verification found no S10 change-caused blockers: 5/5 fresh-copy probes passed, including complete real-file backups, rejected-command data hashes, create-only copying, optional drafts, token-free public loading and no mutation retries. Baseline/candidate restore CLI comparisons matched after the authorized ID substitution. The independent backup probe is retained as `tests/migration-backup-boundary.test.ts`. Live migration, hosted editor cutover, public new-ID reads and webhook propagation remain unexecuted; prior hosted authentication/restore gaps remain external, not local passes. Native review of this new correction is a separate pending outside view, not a claimed receipt.
+
 ## GitHub publication delta
 
 Source upload is authorized for public `matiasrmb/demo-cafeteria-portfolio`, branch `feat/cafe-demo`, without changing remote `main`. Sanity/Cloudflare deployment remains unauthorized and inactive. GitHub upload is not a website deployment.

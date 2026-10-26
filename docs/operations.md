@@ -43,9 +43,9 @@ These steps require the owner's account and explicit external setup; they have n
 
 1. Create/select a Sanity project and a public dataset for fictional content only. Keep only the demo owner in an editing/Administrator role; remove other editing memberships. A public dataset permits public reads, not anonymous writes. Free-plan roles and account policies are owned by Sanity, not this frontend.
 2. Set the two `SANITY_STUDIO_*` identifiers in the Studio process environment. Run `pnpm run studio:dev`. The Studio runs separately, normally at `http://127.0.0.1:3333`.
-3. Sign in through Sanity's authentication. The native singleton `demo.cafe` supplies the initial fictional content. Publish it after reviewing every field. The editor disables duplicate/create paths for the singleton and hides delete as a safety aid; those UI restrictions are NOT an authorization boundary.
+3. Sign in through Sanity's authentication. The native singleton `demo-cafe` supplies initial fictional content only for a new installation. If you already edited the legacy `demo.cafe` document, migrate it before opening the updated Studio; do not publish a fresh seed over your content. Publish after reviewing every field. The editor disables duplicate/create paths for the singleton and hides delete as a safety aid; those UI restrictions are NOT an authorization boundary.
 4. If required, allow only the exact local and hosted Studio origins in Sanity CORS settings, with credentials only for trusted Studio origins. Do not enable credentialed wildcard origins. Server-side website builds do not need browser CORS access.
-5. The owner can deploy Studio with `pnpm run studio:deploy` after choosing the hosted Studio URL and authorizing publication. No such command was executed by this implementation. Hosted Studio serves a login-capable SPA publicly; content mutation requires authenticated project membership. It is not a custom `/admin` route on the café website.
+5. The owner can deploy Studio with `pnpm --filter cafe-demo-studio run deploy` after choosing the hosted Studio URL and authorizing publication. Explicit `run` avoids the installed pnpm CLI's built-in `deploy` command collision. No such deployment was executed by this implementation. Hosted Studio serves a login-capable SPA publicly; content mutation requires authenticated project membership. It is not a custom `/admin` route on the café website.
 6. In a signed-out/private window, verify that content cannot be edited. Sign in as the sole owner and verify publish access. Test a non-editor account if available. Account membership and hosted authentication cannot be proved by a local compilation.
 
 ### Editable content
@@ -81,14 +81,56 @@ After the owner explicitly authorizes Cloudflare hosting setup:
 3. Build/install this workspace from the frozen pnpm lockfile. Review the latest audit output before external deployment; successful installation alone is not security proof.
 4. Set `SITE_URL` to the approved HTTPS origin. Review the four HTML routes, sitemap, images, headers and browser console on the resulting preview before using a custom domain.
 5. Create a Pages Deploy Hook for the intended branch. Its URL is a bearer secret: keep it only in the provider dashboards, not Git, client code, public Sanity documents or screenshots.
-6. Create a Sanity GROQ webhook for the same dataset. Use POST, select publish/create/update/delete as appropriate for the published singleton, filter `_type == "cafeDemo" && _id == "demo.cafe"`, and a minimal `{}` projection. Use the private Pages Deploy Hook as its destination. Do not trigger on drafts, assets or unrelated documents. Validate the provider's actual filter behavior after setup.
+6. Create a Sanity GROQ webhook for the same dataset. Use POST, select publish/create/update/delete as appropriate for the published singleton, filter `_type == "cafeDemo" && _id == "demo-cafe"`, and a minimal `{}` projection. Use the private Pages Deploy Hook as its destination. Do not trigger on drafts, assets or unrelated documents. Validate the provider's actual filter behavior after setup.
 7. Publish an innocuous fictional heading change. Confirm webhook delivery, a new Pages build/deployment, and the changed heading on all relevant deployed pages. Unpublish/delete cases should fail a CMS-mode build rather than silently replace content with stale local data.
 
 This is a provider-to-provider webhook integration, not a new backend. Website reads happen during build; publication is not instantaneous. Propagation includes webhook delivery, build queue, build/deploy duration and CDN update, with no guaranteed delay promised. If the hook fails, the previous static deployment remains visible; repair the provider configuration and trigger an authorized rebuild. Check provider delivery logs without exposing hook URLs or tokens.
 
+## Migrate the legacy singleton without losing edits
+
+**Prepared only: no live migration has been executed or authorized here.** The old ID `demo.cafe` contains a period. Sanity treats that as a private path even in a public dataset, so anonymous website builds cannot read it. The new root-path ID is `demo-cafe`. See [Sanity IDs and paths](https://www.sanity.io/docs/content-lake/ids).
+
+### Scope and preservation
+
+| Source             | Destination        | Effect                                                                |
+| ------------------ | ------------------ | --------------------------------------------------------------------- |
+| `demo.cafe`        | `demo-cafe`        | Copy the current published document, not the original seed. Required. |
+| `drafts.demo.cafe` | `drafts.demo-cafe` | Copy unpublished edits as a draft only when the source draft exists.  |
+
+All content fields, custom fields, array keys, prices, contact settings and asset references are retained. Existing images stay in the same dataset; no asset upload or reference rewrite is needed. New documents receive fresh server revision/timestamp metadata (`_rev`, `_createdAt`, `_updatedAt`, `_system` are not copied). Original documents and their history remain intact; history is not transferred to the new IDs. No source document is patched, deleted or unpublished. No new source draft is created when absent. No other content, schema fields, public routes or redirects change.
+
+### Safe preparation
+
+Set public `SANITY_PROJECT_ID` and `SANITY_DATASET` in your shell to the intended existing project/dataset, then inspect:
+
+```powershell
+pnpm run demo:migrate-id --help
+pnpm run demo:migrate-id --dry-run
+```
+
+These commands do not access the network, read credentials, inspect real documents, create backups or perform writes. Dry-run reports the proposed IDs only; it does **not** prove that the source exists or that destinations are free.
+
+### Later owner-authorized execution and cutover
+
+1. Obtain separate explicit authorization to execute the migration. Pause editing and publishing in the old Studio until copying and verification finish. Keep its version available for comparison; do not open/publish a fresh destination seed first. Review existing webhook behavior before any content write.
+2. Create a private backup directory outside the repository. Restrict its Windows ACL to the operator. Supply a short-lived read/create-capable `SANITY_WRITE_TOKEN` only through a secure administrative process environment, never in source, shell history, chat, Cloudflare or Studio's public variables.
+3. After reviewing the exact target and setting `PRIVATE_BACKUP_DIR`, the future execution command is:
+
+```powershell
+$target = "$($env:SANITY_PROJECT_ID)/$($env:SANITY_DATASET)/demo-cafe"
+pnpm run demo:migrate-id --apply "--confirm=$target" "--backup-dir=$env:PRIVATE_BACKUP_DIR"
+```
+
+4. Apply queries exactly the four source/destination IDs with the authenticated `raw` perspective, requires the old published document, and refuses malformed/duplicate results or either existing destination. It writes the complete source snapshot to an exclusive private JSON backup before one atomic transaction containing only `create` mutations. A destination created after preflight also causes the server transaction to fail rather than overwrite. The script does not retry.
+5. Verify the new published content through the unauthenticated HTTP API with `perspective=published`; compare all content with the original. Verify the optional draft separately through authenticated Studio without publishing it. If a command times out or a mutation response is not confirmed, retain the backup, inspect the exact destination IDs and **do not retry blindly**. If any destination already exists, stop and inspect it; do not delete it or switch to a replacement mutation.
+6. Only after the copy is verified, deploy the corrected Studio and frontend from the corrected commit. New builds remain token-free. Confirm all four routes reflect the preserved published content. This code preparation does not authorize a push or deployment.
+7. Change the provider webhook's singleton filter to `demo-cafe` manually, then publish an innocuous change through the new Studio and verify a successful rebuild. Keep originals for recovery; never run the seed restore as an ID migration. Revoke the short-lived token and retain the private backup outside Git.
+
+This is a fixed two-document migration, not a general dataset migration. Live content counts, provider mutation/permissions, file ACLs, public reads and webhook propagation still require owner verification. Local tests use injected API/backup doubles only.
+
 ## Administrative seed restore
 
-The command lives under `scripts/`, is never shipped as a public route or button, and defaults to a network-free dry run. It targets only `demo.cafe` and `drafts.demo.cafe`, not a whole dataset.
+The command lives under `scripts/`, is never shipped as a public route or button, and defaults to a network-free dry run. It targets only `demo-cafe` and `drafts.demo-cafe`, not a whole dataset. It is destructive by design and is **not** the migration procedure above; the old dotted-ID documents are not restored or changed by this command.
 
 1. Pause Studio editing/publishing and ensure the owner controls the target dataset. Concurrent edits can otherwise be overwritten; this is not a multi-editor locking system.
 2. Create a private backup directory outside the repository. On Windows, restrict its NTFS ACL to the operator; POSIX file modes alone do not enforce Windows privacy. The command resolves symlinks/canonical paths and refuses a backup inside the repository.
@@ -103,7 +145,7 @@ pnpm run demo:restore --dry-run
 5. From PowerShell, after setting `PRIVATE_BACKUP_DIR` to that existing private directory:
 
 ```powershell
-$target = "$($env:SANITY_PROJECT_ID)/$($env:SANITY_DATASET)/demo.cafe"
+$target = "$($env:SANITY_PROJECT_ID)/$($env:SANITY_DATASET)/demo-cafe"
 pnpm run demo:restore --apply "--confirm=$target" "--backup-dir=$env:PRIVATE_BACKUP_DIR"
 ```
 

@@ -18,7 +18,8 @@
     "studio:dev": "pnpm --filter cafe-demo-studio dev",
     "studio:build": "pnpm --filter cafe-demo-studio build",
     "studio:deploy": "pnpm --filter cafe-demo-studio deploy",
-    "demo:restore": "node scripts/restore-demo.ts"
+    "demo:restore": "node scripts/restore-demo.ts",
+    "demo:migrate-id": "node scripts/migrate-demo-id.ts"
   },
   "dependencies": {
     "astro": "7.4.2",

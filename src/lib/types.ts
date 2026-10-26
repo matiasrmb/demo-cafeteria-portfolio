@@ -19,7 +19,7 @@ export interface DemoImage {
 }
 
 export interface CafeContent {
-  _id: "demo.cafe";
+  _id: "demo-cafe";
   _type: "cafeDemo";
   name: string;
   tagline: string;

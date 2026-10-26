@@ -1,8 +1,7 @@
 import { realpathSync } from "node:fs";
-import { writeFile } from "node:fs/promises";
-import { isAbsolute, join, relative, resolve, sep } from "node:path";
+import { isAbsolute, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { randomUUID } from "node:crypto";
+import { assertExternal, writePrivateBackup } from "./private-backup.ts";
 import { cmsSeed } from "../src/data/demo.ts";
 import { API_VERSION, DEMO_ID, sanityTarget } from "../src/lib/content.ts";
 
@@ -11,39 +10,15 @@ export interface RestoreOptions {
   writeBackup?: (directory: string, snapshot: unknown) => Promise<void>;
 }
 
-const ROOT = fileURLToPath(new URL("../", import.meta.url));
 const IDS = [DEMO_ID, `drafts.${DEMO_ID}`];
 export const RESTORE_HELP = `Administrative demo restore (never a public endpoint).
   pnpm run demo:restore --help
   pnpm run demo:restore --dry-run
-  pnpm run demo:restore --apply --confirm=<project>/<dataset>/demo.cafe --backup-dir=<absolute-private-directory>
+  pnpm run demo:restore --apply --confirm=<project>/<dataset>/demo-cafe --backup-dir=<absolute-private-directory>
 Requires public SANITY_PROJECT_ID/SANITY_DATASET; apply also requires SANITY_WRITE_TOKEN.
-Apply backs up, then replaces ONLY demo.cafe and drafts.demo.cafe atomically.
+Apply backs up, then replaces ONLY demo-cafe and drafts.demo-cafe atomically.
 It clears the configured recipient and replaces all edits in these two documents.
 Assets and unrelated documents are not deleted. Pause Studio editing before apply.`;
-
-function assertExternal(directory: string) {
-  const location = relative(realpathSync(ROOT), directory);
-  if (
-    !isAbsolute(directory) ||
-    (!isAbsolute(location) &&
-      location !== ".." &&
-      !location.startsWith(`..${sep}`))
-  ) {
-    throw new Error(
-      "Backup directory must be an existing private absolute directory outside the repository.",
-    );
-  }
-}
-
-async function writePrivateBackup(directory: string, snapshot: unknown) {
-  const file = `cafe-demo-${new Date().toISOString().replaceAll(":", "-")}-${randomUUID()}.json`;
-  await writeFile(join(directory, file), JSON.stringify(snapshot, null, 2), {
-    encoding: "utf8",
-    flag: "wx",
-    mode: 0o600,
-  });
-}
 
 export async function restoreDemo(
   args: string[],
@@ -81,7 +56,7 @@ export async function restoreDemo(
     .find((arg) => arg.startsWith("--confirm="))
     ?.slice("--confirm=".length);
   if (confirmation !== target)
-    throw new Error("Exact project/dataset/demo.cafe confirmation required.");
+    throw new Error("Exact project/dataset/demo-cafe confirmation required.");
   const token = env.SANITY_WRITE_TOKEN;
   if (!token?.trim())
     throw new Error(

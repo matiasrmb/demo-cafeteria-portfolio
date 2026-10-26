@@ -27,7 +27,7 @@ test("restore reads exact ids, backs up typed seed before one transaction and ne
       };
       assert.deepEqual(
         body.mutations.map((mutation) => mutation.createOrReplace._id),
-        ["demo.cafe", "drafts.demo.cafe"],
+        ["demo-cafe", "drafts.demo-cafe"],
       );
       for (const { createOrReplace: doc } of body.mutations) {
         assert.equal(doc.contact.whatsapp, "");
@@ -47,7 +47,7 @@ test("restore reads exact ids, backs up typed seed before one transaction and ne
     assert.equal(url.searchParams.get("perspective"), "raw");
     assert.equal(
       url.searchParams.get("query"),
-      '*[_id in ["demo.cafe","drafts.demo.cafe"]]',
+      '*[_id in ["demo-cafe","drafts.demo-cafe"]]',
     );
     assert.ok(new Headers(init?.headers).has("Authorization"));
     return Response.json({ result: [cmsSeed()] });
@@ -56,7 +56,7 @@ test("restore reads exact ids, backs up typed seed before one transaction and ne
     restoreDemo(
       [
         "--apply",
-        "--confirm=demotest/production/demo.cafe",
+        "--confirm=demotest/production/demo-cafe",
         `--backup-dir=${tmpdir()}`,
       ],
       env,
@@ -65,8 +65,8 @@ test("restore reads exact ids, backs up typed seed before one transaction and ne
         writeBackup: async (_directory, snapshot) => {
           events.push("backup");
           assert.deepEqual((snapshot as { ids: string[] }).ids, [
-            "demo.cafe",
-            "drafts.demo.cafe",
+            "demo-cafe",
+            "drafts.demo-cafe",
           ]);
           assert.equal(posts, 0);
         },
@@ -85,15 +85,15 @@ test("public loader never forwards an administrative token and rejects a draft i
     assert.equal(new Headers(init?.headers).has("Authorization"), false);
     return Response.json({ result: structuredClone(demoContent) });
   });
-  assert.equal(result._id, "demo.cafe");
+  assert.equal(result._id, "demo-cafe");
   const url = new URL(request);
   assert.equal(url.searchParams.get("perspective"), "published");
-  assert.match(url.searchParams.get("query")!, /_id == "demo\.cafe"/);
+  assert.match(url.searchParams.get("query")!, /_id == "demo-cafe"/);
   assert.equal(request.includes(env.SANITY_WRITE_TOKEN), false);
   await assert.rejects(
     loadContent(configured, async () =>
       Response.json({
-        result: { ...structuredClone(demoContent), _id: "drafts.demo.cafe" },
+        result: { ...structuredClone(demoContent), _id: "drafts.demo-cafe" },
       }),
     ),
     /identity/,

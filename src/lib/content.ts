@@ -3,7 +3,7 @@ import { isDate, validRule } from "./availability.ts";
 import type { CafeContent, DemoImage } from "./types.ts";
 
 export const API_VERSION = "2025-02-19";
-export const DEMO_ID = "demo.cafe";
+export const DEMO_ID = "demo-cafe";
 
 function requireCondition(
   condition: unknown,

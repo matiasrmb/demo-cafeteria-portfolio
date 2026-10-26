@@ -11,7 +11,7 @@ const env = {
 };
 const apply = [
   "--apply",
-  "--confirm=demotest/production/demo.cafe",
+  "--confirm=demotest/production/demo-cafe",
   `--backup-dir=${tmpdir()}`,
 ];
 
@@ -25,7 +25,7 @@ test("restore defaults to a network-free dry run and requires exact administrati
   for (const args of [
     ["--apply"],
     [...apply, "--unknown"],
-    ["--apply", "--confirm=other/production/demo.cafe"],
+    ["--apply", "--confirm=other/production/demo-cafe"],
   ]) {
     await assert.rejects(restoreDemo(args, env, { fetcher }));
   }
@@ -36,7 +36,7 @@ test("restore defaults to a network-free dry run and requires exact administrati
     restoreDemo(
       [
         "--apply",
-        "--confirm=demotest/production/demo.cafe",
+        "--confirm=demotest/production/demo-cafe",
         `--backup-dir=${process.cwd()}`,
       ],
       env,
@@ -49,8 +49,8 @@ test("restore defaults to a network-free dry run and requires exact administrati
 test("restore backs up first and only resets the two exact demo ids in one transaction", async () => {
   const original = { ...cmsSeed(), homeTitle: "Owner-edited demonstration" };
   const state = new Map<string, unknown>([
-    ["demo.cafe", original],
-    ["drafts.demo.cafe", { ...original, _id: "drafts.demo.cafe" }],
+    ["demo-cafe", original],
+    ["drafts.demo-cafe", { ...original, _id: "drafts.demo-cafe" }],
     ["unrelated", { keep: true }],
   ]);
   const before = JSON.stringify([...state]);
@@ -63,7 +63,7 @@ test("restore backs up first and only resets the two exact demo ids in one trans
       const body = JSON.parse(String(init.body));
       assert.equal(body.mutations.length, 2);
       for (const { createOrReplace: doc } of body.mutations) {
-        assert.ok(["demo.cafe", "drafts.demo.cafe"].includes(doc._id));
+        assert.ok(["demo-cafe", "drafts.demo-cafe"].includes(doc._id));
         assert.equal(doc._type, "cafeDemo");
         state.set(doc._id, doc);
       }
@@ -76,7 +76,7 @@ test("restore backs up first and only resets the two exact demo ids in one trans
       });
     }
     return Response.json({
-      result: [state.get("demo.cafe"), state.get("drafts.demo.cafe")],
+      result: [state.get("demo-cafe"), state.get("drafts.demo-cafe")],
     });
   };
   const result = await restoreDemo(apply, env, {
@@ -92,7 +92,7 @@ test("restore backs up first and only resets the two exact demo ids in one trans
   assert.equal(result.action, "restored");
   assert.equal(posts, 1);
   assert.equal(
-    (state.get("demo.cafe") as ReturnType<typeof cmsSeed>).contact.whatsapp,
+    (state.get("demo-cafe") as ReturnType<typeof cmsSeed>).contact.whatsapp,
     "",
   );
   assert.deepEqual(state.get("unrelated"), { keep: true });
