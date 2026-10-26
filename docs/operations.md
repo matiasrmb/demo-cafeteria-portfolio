@@ -99,6 +99,8 @@ This is a provider-to-provider webhook integration, not a new backend. Website r
 
 All content fields, custom fields, array keys, prices, contact settings and asset references are retained. Existing images stay in the same dataset; no asset upload or reference rewrite is needed. New documents receive fresh server revision/timestamp metadata (`_rev`, `_createdAt`, `_updatedAt`, `_system` are not copied). Original documents and their history remain intact; history is not transferred to the new IDs. No source document is patched, deleted or unpublished. No new source draft is created when absent. No other content, schema fields, public routes or redirects change.
 
+**Privacy consequence:** the new published root-ID document makes every copied content field anonymously readable, including custom fields not displayed on the website. Before authorizing apply, inspect the source privately and confirm it contains only approved public fictional content, with no credentials, private notes or visitor information. The copied draft remains restricted. This migration does not redact or classify fields automatically.
+
 ### Safe preparation
 
 Set public `SANITY_PROJECT_ID` and `SANITY_DATASET` in your shell to the intended existing project/dataset, then inspect:
